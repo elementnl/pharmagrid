@@ -1,29 +1,28 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { X } from "lucide-react";
-import { drugs } from "../utils/puzzleGenerator";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { drugs } from "@/utils/puzzleGenerator";
 
-export default function GuessModal({ rowCategory, colCategory, onSubmit, onClose }) {
+export default function GuessModal({ rowCategory, colCategory, onSubmit, onClose, usedDrugs = new Set(), duplicateWarning }) {
   const [input, setInput] = useState("");
   const [highlightIndex, setHighlightIndex] = useState(-1);
   const inputRef = useRef(null);
   const listRef = useRef(null);
 
   useEffect(() => {
-    setTimeout(() => inputRef.current?.focus(), 50);
+    setTimeout(() => inputRef.current?.focus(), 100);
   }, []);
-
-  useEffect(() => {
-    const handleEsc = (e) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [onClose]);
 
   const allDrugs = useMemo(() => {
     return drugs.map((d) => ({
       generic: d.generic_name,
-      brand: d.brand_name,
     }));
   }, []);
 
@@ -31,11 +30,7 @@ export default function GuessModal({ rowCategory, colCategory, onSubmit, onClose
     const query = input.toLowerCase().trim();
     if (!query) return [];
     return allDrugs
-      .filter(
-        (d) =>
-          d.generic.toLowerCase().includes(query) ||
-          d.brand.toLowerCase().includes(query)
-      )
+      .filter((d) => d.generic.toLowerCase().includes(query))
       .slice(0, 6);
   }, [input, allDrugs]);
 
@@ -84,38 +79,33 @@ export default function GuessModal({ rowCategory, colCategory, onSubmit, onClose
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-5 bg-overlay backdrop-blur-sm animate-overlay-in"
-      onClick={onClose}
-    >
-      <div
-        className="bg-bg-elevated border border-border rounded-2xl p-8 pt-7 w-full max-w-100 shadow-lg relative animate-modal-in"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Close button */}
-        <button
-          className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-lg text-text-muted hover:bg-accent-bg hover:text-text-primary transition-all cursor-pointer"
-          onClick={onClose}
-        >
-          <X size={18} />
-        </button>
+    <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Make a Guess</DialogTitle>
+          <DialogDescription>
+            Name a drug that matches both categories
+          </DialogDescription>
+        </DialogHeader>
 
         {/* Category clues */}
-        <div className="flex items-center justify-center gap-3 mb-6">
-          <div className="flex flex-col items-center px-4 py-3 bg-accent-bg border border-border rounded-xl flex-1">
-            <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">
+        <div className="flex items-stretch gap-2">
+          <div className="flex flex-col items-center justify-center px-3 py-3 bg-muted rounded-lg flex-1 min-w-0">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-1">
               {rowCategory.label}
             </span>
-            <span className="text-[15px] font-bold text-accent mt-0.5">
+            <span className="text-sm font-bold text-primary leading-snug uppercase text-center">
               {rowCategory.value}
             </span>
           </div>
-          <span className="text-text-muted text-lg font-light">&</span>
-          <div className="flex flex-col items-center px-4 py-3 bg-accent-bg border border-border rounded-xl flex-1">
-            <span className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">
+          <div className="flex items-center shrink-0">
+            <span className="text-muted-foreground text-sm">&</span>
+          </div>
+          <div className="flex flex-col items-center justify-center px-3 py-3 bg-muted rounded-lg flex-1 min-w-0">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-1">
               {colCategory.label}
             </span>
-            <span className="text-[15px] font-bold text-accent mt-0.5">
+            <span className="text-sm font-bold text-primary leading-snug uppercase text-center">
               {colCategory.value}
             </span>
           </div>
@@ -124,14 +114,13 @@ export default function GuessModal({ rowCategory, colCategory, onSubmit, onClose
         {/* Input form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div className="relative">
-            <input
+            <Input
               ref={inputRef}
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Start typing a drug name..."
-              className="w-full px-4 py-3.5 bg-bg border-2 border-border rounded-xl text-text-primary text-base outline-none transition-all focus:border-accent focus:shadow-[0_0_0_3px_var(--color-accent-bg)] placeholder:text-text-muted placeholder:text-sm"
               autoComplete="off"
               spellCheck="false"
               role="combobox"
@@ -143,44 +132,49 @@ export default function GuessModal({ rowCategory, colCategory, onSubmit, onClose
             {suggestions.length > 0 && (
               <ul
                 ref={listRef}
-                className="absolute top-full left-0 right-0 z-10 mt-1 bg-bg-elevated border border-border rounded-xl shadow-lg max-h-60 overflow-y-auto p-1 animate-fade-in"
+                className="absolute top-full left-0 right-0 z-10 mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto p-1"
                 role="listbox"
               >
-                {suggestions.map((drug, i) => (
-                  <li
-                    key={drug.generic}
-                    className={`flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer transition-colors ${
-                      i === highlightIndex ? "bg-accent-bg" : "hover:bg-accent-bg"
-                    }`}
-                    onClick={() => selectDrug(drug.generic)}
-                    role="option"
-                    aria-selected={i === highlightIndex}
-                  >
-                    <span className="text-sm font-semibold text-text-primary">
-                      {drug.generic}
-                    </span>
-                    <span className="text-xs text-text-muted italic">
-                      {drug.brand}
-                    </span>
-                  </li>
-                ))}
+                {suggestions.map((drug, i) => {
+                  const isUsed = usedDrugs.has(drug.generic);
+                  return (
+                    <li
+                      key={drug.generic}
+                      className={`flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors ${
+                        isUsed
+                          ? "opacity-40 cursor-not-allowed"
+                          : `cursor-pointer ${i === highlightIndex ? "bg-accent text-accent-foreground" : "hover:bg-accent hover:text-accent-foreground"}`
+                      }`}
+                      onClick={() => !isUsed && selectDrug(drug.generic)}
+                      role="option"
+                      aria-selected={i === highlightIndex}
+                    >
+                      <span className="font-medium">
+                        {drug.generic}
+                        {isUsed && <span className="text-xs font-normal text-muted-foreground ml-1.5">(used)</span>}
+                      </span>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>
 
-          <button
-            type="submit"
-            disabled={!input.trim()}
-            className="py-3 bg-linear-to-br from-gradient-start to-gradient-end text-white text-[15px] font-bold rounded-xl shadow-[0_2px_8px_rgba(108,92,231,0.3)] transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(108,92,231,0.4)] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-          >
+          <Button type="submit" disabled={!input.trim()}>
             Submit Guess
-          </button>
+          </Button>
         </form>
 
-        <p className="text-center text-xs text-text-muted mt-3">
-          Type to search, use arrow keys to navigate
-        </p>
-      </div>
-    </div>
+        {duplicateWarning ? (
+          <p className="text-center text-xs text-destructive font-semibold">
+            You already used {duplicateWarning}!
+          </p>
+        ) : (
+          <p className="text-center text-xs text-muted-foreground">
+            Type to search, use arrow keys to navigate
+          </p>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }

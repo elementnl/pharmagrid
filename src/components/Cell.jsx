@@ -1,41 +1,76 @@
-import { Check, X } from "lucide-react";
+import { Check, Eye } from "lucide-react";
 
-export default function Cell({ cellData, onSelect, disabled, rowIdx, colIdx }) {
-  if (cellData) {
-    const isCorrect = cellData.correct;
+function toTitleCase(str) {
+  return str.replace(
+    /\b\w+/g,
+    (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  );
+}
+
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export default function Cell({ cellData, onSelect, disabled, rowIdx, colIdx, shaking }) {
+  // Correct answer — locked in green
+  if (cellData?.correct) {
+    const displayGeneric = toTitleCase(cellData.drugName);
+    const displayBrand = cellData.brandName ? capitalize(cellData.brandName) : null;
+
     return (
-      <div
-        className={`aspect-square flex flex-col items-center justify-center rounded-xl border-2 p-1.5 text-center
-          ${isCorrect ? "bg-correct-bg border-correct-border" : "bg-incorrect-bg border-incorrect-border"}
-          ${isCorrect ? "animate-pop-in" : "animate-pop-in [animation-duration:0.35s]"}
-        `}
-        style={!isCorrect ? { animation: "pop-in 0.35s ease, shake 0.4s ease 0.1s" } : undefined}
-      >
-        <span
-          className={`font-bold text-[11px] leading-tight wrap-break-word ${
-            isCorrect ? "text-correct" : "text-incorrect"
-          }`}
-        >
-          {cellData.drugName}
+      <div className="aspect-square flex flex-col items-center justify-center rounded-xl border-2 p-1.5 text-center animate-pop-in bg-success/10 border-success/40">
+        <span className="font-bold text-[11px] sm:text-xs leading-tight wrap-break-word text-success">
+          {displayGeneric}
         </span>
-        {isCorrect ? (
-          <Check size={16} className="text-correct mt-0.5" strokeWidth={3} />
-        ) : (
-          <X size={16} className="text-incorrect mt-0.5" strokeWidth={3} />
+        {displayBrand && (
+          <span className="text-[9px] sm:text-[11px] leading-tight mt-0.5 opacity-70 text-success">
+            ({displayBrand})
+          </span>
         )}
+        <Check size={12} className="text-success mt-0.5 shrink-0" strokeWidth={3} />
       </div>
     );
   }
 
-  if (disabled) {
+  // Revealed answer (game over, unfilled) — yellow, clickable for more answers
+  if (cellData?.revealed) {
+    const displayGeneric = toTitleCase(cellData.drugName);
+    const displayBrand = cellData.brandName ? capitalize(cellData.brandName) : null;
+
     return (
-      <div className="aspect-square rounded-xl border-2 border-dashed border-border bg-bg-surface opacity-40" />
+      <div
+        className="aspect-square flex flex-col items-center justify-center rounded-xl border-2 p-1.5 text-center animate-pop-in bg-amber-500/10 border-amber-500/40 cursor-pointer hover:bg-amber-500/15 transition-all"
+        onClick={() => onSelect(rowIdx, colIdx)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") onSelect(rowIdx, colIdx);
+        }}
+      >
+        <span className="font-bold text-[11px] sm:text-xs leading-tight wrap-break-word text-amber-600 dark:text-amber-400">
+          {displayGeneric}
+        </span>
+        {displayBrand && (
+          <span className="text-[9px] sm:text-[11px] leading-tight mt-0.5 opacity-70 text-amber-600 dark:text-amber-400">
+            ({displayBrand})
+          </span>
+        )}
+        <Eye size={12} className="text-amber-600 dark:text-amber-400 mt-0.5 shrink-0 opacity-60" strokeWidth={2} />
+      </div>
     );
   }
 
+  // Disabled empty cell (shouldn't happen anymore since we reveal answers)
+  if (disabled) {
+    return (
+      <div className="aspect-square rounded-xl border-2 border-dashed border-border bg-card opacity-40" />
+    );
+  }
+
+  // Empty cell — clickable
   return (
     <div
-      className="aspect-square flex items-center justify-center rounded-xl border-2 border-border bg-cell-bg shadow-sm cursor-pointer transition-all hover:bg-cell-hover hover:border-accent hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
+      className={`aspect-square flex items-center justify-center rounded-xl border-2 border-border bg-card shadow-sm cursor-pointer transition-all hover:bg-muted hover:border-primary hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 ${shaking ? "animate-shake border-destructive/50" : ""}`}
       onClick={() => onSelect(rowIdx, colIdx)}
       role="button"
       tabIndex={0}
@@ -43,7 +78,7 @@ export default function Cell({ cellData, onSelect, disabled, rowIdx, colIdx }) {
         if (e.key === "Enter" || e.key === " ") onSelect(rowIdx, colIdx);
       }}
     >
-      <span className="text-text-muted text-xs font-medium opacity-60">
+      <span className="text-muted-foreground text-xs font-medium opacity-50">
         ?
       </span>
     </div>

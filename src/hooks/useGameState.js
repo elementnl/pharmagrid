@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 const STORAGE_KEY_PREFIX = "drugGrid_";
 const MAX_GUESSES = 9;
@@ -8,7 +8,6 @@ function loadState(dateStr) {
     const saved = localStorage.getItem(STORAGE_KEY_PREFIX + dateStr);
     if (saved) return JSON.parse(saved);
   } catch {
-    // ignore corrupted state
   }
   return null;
 }
@@ -19,7 +18,6 @@ function saveState(dateStr, state) {
 
 function createInitialState() {
   return {
-    // grid[row][col] = { drugName, correct } or null
     grid: [
       [null, null, null],
       [null, null, null],
@@ -27,7 +25,7 @@ function createInitialState() {
     ],
     guessesUsed: 0,
     isComplete: false,
-    score: 0, // number of correct answers
+    score: 0,
   };
 }
 
@@ -36,19 +34,25 @@ export function useGameState(dateStr) {
     return loadState(dateStr) || createInitialState();
   });
 
+  useEffect(() => {
+    setState(loadState(dateStr) || createInitialState());
+  }, [dateStr]);
+
   const makeGuess = useCallback(
-    (row, col, drugName, isCorrect) => {
+    (row, col, drugName, isCorrect, brandName = null) => {
       setState((prev) => {
         if (prev.isComplete) return prev;
-        if (prev.grid[row][col] !== null) return prev;
+        if (prev.grid[row][col]?.correct) return prev;
 
         const newGrid = prev.grid.map((r) => [...r]);
-        newGrid[row][col] = { drugName, correct: isCorrect };
+
+        if (isCorrect) {
+          newGrid[row][col] = { drugName, correct: true, brandName };
+        }
 
         const newGuessesUsed = prev.guessesUsed + 1;
         const newScore = prev.score + (isCorrect ? 1 : 0);
 
-        // Game ends when all 9 guesses used or all 9 cells correct
         const allCorrect = newGrid.flat().every((cell) => cell?.correct);
         const isComplete = newGuessesUsed >= MAX_GUESSES || allCorrect;
 

@@ -1,4 +1,7 @@
 import { ChevronLeft, ChevronRight, Pill, Sun, Moon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 
 export default function GameHeader({
   dateStr,
@@ -21,75 +24,98 @@ export default function GameHeader({
 
   return (
     <header className="text-center animate-fade-in">
-      {/* Top row: spacer | brand | theme toggle */}
-      <div className="flex items-center justify-between mb-1">
-        <div className="w-12" />
-        <div className="flex items-center gap-2.5">
-          <Pill
-            size={28}
-            className="text-accent animate-pulse-glow"
-            strokeWidth={2}
-          />
-          <h1 className="text-[28px] font-extrabold tracking-tight bg-linear-to-br from-gradient-start to-gradient-end bg-clip-text text-transparent">
-            PharmGrid
-          </h1>
-        </div>
-        <button
-          onClick={onToggleTheme}
-          className="w-10 h-10 flex items-center justify-center rounded-xl border border-border bg-bg-surface text-text-secondary hover:bg-cell-hover hover:border-border-hover transition-all cursor-pointer"
-          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-        >
-          {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-        </button>
+      {/* Theme toggle — fixed top-right on desktop */}
+      <div className="fixed top-4 right-4 z-40 hidden sm:flex items-center gap-2">
+        <span className="text-xs text-muted-foreground">
+          {theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        </span>
+        <Switch
+          checked={theme === "dark"}
+          onCheckedChange={onToggleTheme}
+          aria-label="Toggle dark mode"
+        />
       </div>
 
-      <p className="text-[13px] text-text-muted tracking-wide mb-4">
+      {/* Logo */}
+      <div className="flex items-center justify-center gap-2.5 mb-1">
+        <Pill
+          size={28}
+          className="text-primary animate-pulse-glow"
+          strokeWidth={2}
+        />
+        <h1 className="font-heading text-3xl sm:text-4xl tracking-tight bg-linear-to-br from-primary to-primary/60 bg-clip-text text-transparent font-black">
+          <span className="font-thin">PHARMA</span>GRID
+        </h1>
+      </div>
+
+      <p className="text-xs sm:text-[13px] text-muted-foreground tracking-wide mb-4">
         Name drugs that match both categories
       </p>
 
       {/* Date nav */}
-      <div className="flex items-center justify-center gap-3.5 mb-4">
-        <button
+      <div className="flex items-center justify-center gap-3 mb-4">
+        <Button
+          variant="outline"
+          size="icon"
           onClick={onPrevDay}
-          className="w-8.5 h-8.5 flex items-center justify-center rounded-[10px] border border-border bg-bg-surface text-text-secondary shadow-sm hover:bg-cell-hover hover:border-border-hover hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 transition-all disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer"
+          className="h-8 w-8 rounded-lg"
           aria-label="Previous day"
         >
           <ChevronLeft size={16} />
-        </button>
-        <span className="text-sm text-text-secondary font-medium min-w-40 tabular-nums">
+        </Button>
+        <span className="text-sm text-foreground font-medium min-w-36 sm:min-w-40 tabular-nums">
           {formatted}
         </span>
-        <button
+        <Button
+          variant="outline"
+          size="icon"
           onClick={onNextDay}
           disabled={isToday}
-          className="w-8.5 h-8.5 flex items-center justify-center rounded-[10px] border border-border bg-bg-surface text-text-secondary shadow-sm hover:bg-cell-hover hover:border-border-hover hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 transition-all disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer"
+          className="h-8 w-8 rounded-lg"
           aria-label="Next day"
         >
           <ChevronRight size={16} />
-        </button>
+        </Button>
       </div>
 
       {/* Stats */}
-      <div className="flex justify-center gap-2.5">
-        <div className="flex items-center gap-1.5 px-3.5 py-1.5 bg-bg-surface border border-border rounded-full text-[13px] shadow-sm">
-          <span className="text-text-muted">Guesses</span>
-          <span className="text-text-primary font-bold">{guessesRemaining}</span>
-        </div>
-        <div className="flex items-center gap-1.5 px-3.5 py-1.5 bg-bg-surface border border-border rounded-full text-[13px] shadow-sm">
-          <span className="text-text-muted">Score</span>
-          <span className="text-text-primary font-bold">{score}/9</span>
-        </div>
+      <div className="flex justify-center gap-2 flex-wrap">
+        <Badge variant="secondary" className="text-[13px] px-3 py-1 gap-1.5">
+          <span className="text-muted-foreground font-normal">Guesses Left</span>
+          <span className="font-bold">{guessesRemaining}</span>
+        </Badge>
+        <Badge variant="secondary" className="text-[13px] px-3 py-1 gap-1.5">
+          <span className="text-muted-foreground font-normal">Score</span>
+          <span className="font-bold">{score}/9</span>
+        </Badge>
         {isComplete && (
-          <div
-            className={`flex items-center px-3.5 py-1.5 rounded-full text-[13px] font-bold animate-pop-in ${
+          <Badge
+            className={`text-[13px] px-3 py-1 animate-pop-in ${
               score === 9
-                ? "bg-correct-bg border border-correct-border text-correct"
-                : "bg-accent-bg border border-accent text-accent"
+                ? "bg-success/15 text-success border-success/40"
+                : "bg-primary/10 text-primary border-primary/40"
             }`}
           >
             {score === 9 ? "Perfect!" : "Done"}
-          </div>
+          </Badge>
         )}
+      </div>
+
+      {/* Theme toggle — fixed bottom-center on mobile */}
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex sm:hidden items-center gap-2 bg-card border border-border rounded-full px-4 py-2 shadow-md">
+        {theme === "dark" ? (
+          <Moon size={14} className="text-muted-foreground" />
+        ) : (
+          <Sun size={14} className="text-muted-foreground" />
+        )}
+        <span className="text-xs text-muted-foreground">
+          {theme === "dark" ? "Dark" : "Light"}
+        </span>
+        <Switch
+          checked={theme === "dark"}
+          onCheckedChange={onToggleTheme}
+          aria-label="Toggle dark mode"
+        />
       </div>
     </header>
   );

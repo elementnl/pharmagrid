@@ -1,5 +1,3 @@
-// Simple seeded PRNG (mulberry32)
-// Given the same seed, always produces the same sequence of numbers
 export function createSeededRandom(seed) {
   let h = seed;
   return function () {
@@ -10,18 +8,15 @@ export function createSeededRandom(seed) {
   };
 }
 
-// Convert a date string like "2026-04-06" to a numeric seed
 export function dateToSeed(dateStr) {
-  let hash = 0;
+  let h = 0x811c9dc5;
   for (let i = 0; i < dateStr.length; i++) {
-    const char = dateStr.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0;
+    h ^= dateStr.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
   }
-  return hash;
+  return h >>> 0;
 }
 
-// Shuffle an array in place using the seeded random function
 export function seededShuffle(array, random) {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -31,8 +26,6 @@ export function seededShuffle(array, random) {
   return arr;
 }
 
-// Get today's date as YYYY-MM-DD string
 export function getTodayString() {
-  const now = new Date();
-  return now.toISOString().split("T")[0];
+  return new Date().toISOString().split("T")[0];
 }
