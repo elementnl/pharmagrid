@@ -1,16 +1,35 @@
-# React + Vite
+# PharmaGrid
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A daily pharmacy trivia game inspired by Immaculate Grid. Match drugs to category intersections on a 3x3 grid using your knowledge of the top 200 drugs.
 
-Currently, two official plugins are available:
+## How to Play
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Each day generates a new puzzle with 6 categories (3 rows, 3 columns)
+- Click a cell and type the generic name of a drug that matches both its row and column categories
+- You get 9 guesses total — wrong guesses consume a guess but the cell stays open
+- Each drug can only be used once
+- After the game ends, missed cells reveal answers in yellow — click them to see all valid options
 
-## React Compiler
+## Setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm install
+npm run dev
+```
 
-## Expanding the ESLint configuration
+## Build
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm run build
+```
+
+## Stack
+
+- React + Vite
+- Tailwind CSS v4
+- shadcn/ui
+- No backend — puzzles are generated client-side from a seeded PRNG tied to the date
+
+## Data
+
+Drug data lives in `src/data/drugs.json` — 199 drugs with 17 category fields including drug class, indication, route, suffix, brand names, and more.

@@ -8,7 +8,6 @@ export default function Grid({ puzzle, gameState, onCellSelect, shakingCell }) {
   const labelRef = useRef(null);
   const [labelWidth, setLabelWidth] = useState(0);
 
-  // Measure the row label column width to offset centering on desktop
   useEffect(() => {
     if (labelRef.current) {
       const observer = new ResizeObserver((entries) => {
@@ -23,7 +22,6 @@ export default function Grid({ puzzle, gameState, onCellSelect, shakingCell }) {
 
   return (
     <>
-      {/* Mobile: 4-col grid, shifted slightly left to visually center cells */}
       <div className="w-full sm:hidden overflow-hidden">
         <div
           className="grid gap-1 -translate-x-2"
@@ -54,7 +52,6 @@ export default function Grid({ puzzle, gameState, onCellSelect, shakingCell }) {
         </div>
       </div>
 
-      {/* Desktop: centered 3x3 with translate offset */}
       <div className="w-full hidden sm:flex justify-center overflow-visible">
         <div
           className="grid gap-2 mt-5"
