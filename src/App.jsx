@@ -41,7 +41,7 @@ export default function App() {
           const drug = validDrugs[0];
           return {
             drugName: drug.generic_name,
-            brandName: drug.brand_name,
+            brandName: [...new Set([drug.brand_name, ...(drug.accepted_names || [])])],
             correct: false,
             revealed: true,
           };
@@ -112,7 +112,9 @@ export default function App() {
 
       const matchedDrug = getDrugByName(drugName);
       const displayName = matchedDrug ? matchedDrug.generic_name : drugName;
-      const brandName = matchedDrug ? matchedDrug.brand_name : null;
+      const brandName = matchedDrug
+        ? [...new Set([matchedDrug.brand_name, ...(matchedDrug.accepted_names || [])])]
+        : null;
 
       gameState.makeGuess(row, col, displayName, isCorrect, brandName);
       setSelectedCell(null);

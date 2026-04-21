@@ -48,20 +48,31 @@ function enrichDrugs(drugs) {
   return drugs.map((drug) => {
     const genericLower = drug.generic_name.toLowerCase();
     const genericBase = stripSalt(genericLower);
+    const allBrands = [drug.brand_name, ...(drug.accepted_names || [])];
+    const brandStartsWithSet = [...new Set(allBrands.map((b) => b[0].toUpperCase()))];
+    const brandEndsWithSet = [...new Set(allBrands.map((b) => b[b.length - 1].toUpperCase()))];
     return {
       ...drug,
       _genericBase: genericBase !== genericLower ? genericBase : null,
-      brand_starts_with: drug.brand_name[0].toUpperCase(),
-      brand_ends_with: drug.brand_name[drug.brand_name.length - 1].toUpperCase(),
+      brand_starts_with: brandStartsWithSet,
+      brand_ends_with: brandEndsWithSet,
     };
   });
+}
+
+function drugMatchesCategoryValue(drug, catKey, value) {
+  const fieldVal = drug[catKey];
+  if (Array.isArray(fieldVal)) return fieldVal.includes(value);
+  return fieldVal === value;
 }
 
 const drugs = enrichDrugs(drugsData);
 
 function getDrugsForCell(rowCat, rowVal, colCat, colVal) {
   return drugs.filter(
-    (drug) => drug[rowCat] === rowVal && drug[colCat] === colVal
+    (drug) =>
+      drugMatchesCategoryValue(drug, rowCat, rowVal) &&
+      drugMatchesCategoryValue(drug, colCat, colVal)
   );
 }
 
@@ -77,8 +88,8 @@ export function isDrugValidForCell(drugName, rowCategory, rowValue, colCategory,
   return drugs.some(
     (drug) =>
       nameMatchesDrug(drugName, drug) &&
-      drug[rowCategory] === rowValue &&
-      drug[colCategory] === colValue
+      drugMatchesCategoryValue(drug, rowCategory, rowValue) &&
+      drugMatchesCategoryValue(drug, colCategory, colValue)
   );
 }
 
@@ -88,7 +99,9 @@ export function getDrugByName(drugName) {
 
 export function getValidDrugsForCell(rowCategory, rowValue, colCategory, colValue) {
   return drugs.filter(
-    (drug) => drug[rowCategory] === rowValue && drug[colCategory] === colValue
+    (drug) =>
+      drugMatchesCategoryValue(drug, rowCategory, rowValue) &&
+      drugMatchesCategoryValue(drug, colCategory, colValue)
   );
 }
 
@@ -186,7 +199,11 @@ export function generatePuzzle(dateStr) {
       const valueCounts = {};
       for (const drug of drugs) {
         const val = drug[cat.key];
-        if (val && !excluded.has(val)) {
+        if (Array.isArray(val)) {
+          for (const v of val) {
+            if (!excluded.has(v)) valueCounts[v] = (valueCounts[v] || 0) + 1;
+          }
+        } else if (val && !excluded.has(val)) {
           valueCounts[val] = (valueCounts[val] || 0) + 1;
         }
       }

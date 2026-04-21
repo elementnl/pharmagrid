@@ -525,7 +525,7 @@
     "dosage_form": "inhaler",
     "body_system": "respiratory",
     "suffix": "-ol",
-    "dosing_frequency": "as needed",
+    "dosing_frequency": "multiple times daily",
     "black_box_warning": "no",
     "narrow_therapeutic_index": "no",
     "mechanism_type": "agonist",

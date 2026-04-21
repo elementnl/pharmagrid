@@ -15,7 +15,11 @@ export default function Cell({ cellData, onSelect, disabled, rowIdx, colIdx, sha
   // Correct answer — locked in green
   if (cellData?.correct) {
     const displayGeneric = toTitleCase(cellData.drugName);
-    const displayBrand = cellData.brandName ? capitalize(cellData.brandName) : null;
+    const displayBrand = cellData.brandName
+      ? (Array.isArray(cellData.brandName) ? cellData.brandName : [cellData.brandName])
+          .map(capitalize)
+          .join(" / ")
+      : null;
 
     return (
       <div className="aspect-square flex flex-col items-center justify-center rounded-xl border-2 p-1.5 text-center animate-pop-in bg-success/10 border-success/40">
@@ -35,7 +39,11 @@ export default function Cell({ cellData, onSelect, disabled, rowIdx, colIdx, sha
   // Revealed answer (game over, unfilled) — yellow, clickable for more answers
   if (cellData?.revealed) {
     const displayGeneric = toTitleCase(cellData.drugName);
-    const displayBrand = cellData.brandName ? capitalize(cellData.brandName) : null;
+    const displayBrand = cellData.brandName
+      ? (Array.isArray(cellData.brandName) ? cellData.brandName : [cellData.brandName])
+          .map(capitalize)
+          .join(" / ")
+      : null;
 
     return (
       <div
