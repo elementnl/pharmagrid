@@ -3,7 +3,7 @@ import { createSeededRandom, dateToSeed, seededShuffle } from "./seededRandom";
 
 const CATEGORIES = [
   { key: "drug_class", label: "Drug Class" },
-  { key: "therapeutic_category", label: "Category" },
+  { key: "therapeutic_category", label: "Therapeutic Class" },
   { key: "indication_group", label: "Indication" },
   { key: "route", label: "Route" },
   { key: "rx_status", label: "Rx Status" },
@@ -14,7 +14,7 @@ const CATEGORIES = [
   { key: "black_box_warning", label: "Black Box Warning?" },
   { key: "narrow_therapeutic_index", label: "Narrow Therapeutic Index?" },
   { key: "mechanism_type", label: "Mechanism" },
-  { key: "common_side_effect", label: "Side Effect" },
+  { key: "common_side_effect", label: "Most Common Side Effect" },
   { key: "approval_era", label: "Approved in" },
   { key: "brand_starts_with", label: "Brand name Starts With", group: "letter" },
   { key: "brand_ends_with", label: "Brand name Ends With", group: "letter" },
